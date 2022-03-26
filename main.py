@@ -1,3 +1,4 @@
+import math
 import pygame
 import numpy as np
 
@@ -18,7 +19,8 @@ def load_tile(name):
     return pygame.transform.scale(pygame.image.load(f'resources/tiles/{name}.png'), (64, 64))
 
 tiles = {
-    "grass": load_tile('red-painter-man41')
+    'flower': load_tile('red-painter-man41'),
+    'bucket': load_tile('bucket')
 }
 
 
@@ -30,6 +32,10 @@ smileyRect = smiley.get_rect()
 smileyRect.center = (3*width/10, 5*height/12)
 
 font = pygame.font.Font('resources/font/segoeui.ttf', 30)
+loadingText = []
+for i in range(101):
+    loadingText.append(font.render(f'{i}% complete', True, color_white))
+
 smallFont = pygame.font.Font('resources/font/segoeui.ttf', 14)
 
 seconds = lambda: pygame.time.get_ticks()/1000
@@ -44,22 +50,56 @@ key = {
 direction = 1
 
 x = 0
-y = 1
+y = height-tiles["flower"].get_height()
 
 scene = 1
 fullscreen = False
 fullscreen_time = seconds()
 
+flowers = []
+
+gravity = 100
+
+speed = 0.5
+score = 0
+
+def flower_respawn(i):
+    global flowers
+    flowers[i][0] = round(np.random.uniform() * (width - tiles['flower'].get_width()))
+    flowers[i][1] = -(seconds() * gravity + tiles['flower'].get_height())
+
 def draw_scene1():
     screen.fill(color_screen)
-    screen.blit(tiles["grass"], (x, y))
+    screen.blit(tiles['bucket'], (x, y))
+    for flower in flowers:
+        screen.blit(tiles['flower'], (flower[0], flower[1]+gravity*seconds()))
 
 def update_scene1():
-    global x, scene
+    global x, scene, score, gravity, speed
     if key["d"]:
-        x += 1
+        x += speed
     if key["a"]:
-        x -= 1
+        x -= speed
+
+    leftx = x - tiles['bucket'].get_width()/2
+    rightx = x + tiles['bucket'].get_width()/2
+
+    if math.log2(round(seconds()+1+score)) > len(flowers):
+        flowers.append([round(np.random.uniform() * (width - tiles['flower'].get_width())), -(seconds() * gravity + tiles['flower'].get_height())])
+
+    for i in range(len(flowers)):
+        if flowers[i][1] > -(seconds() * gravity - height + tiles['bucket'].get_height() + tiles['flower'].get_height()):
+            if leftx <= flowers[i][0] and flowers[i][0] <= rightx:
+                print(f'flower catch {seconds()}')
+                score += 1
+                gravity += 1
+                speed += 0.05
+                flower_respawn(i)
+        elif flowers[i][1] > -(seconds() * gravity - height):
+            print(f'respawn {seconds()}')
+            flower_respawn(i)
+        
+    
     if x > width:
         scene = 3
 
@@ -75,6 +115,7 @@ def draw_scene3():
     else:
         screen.fill(color_blueflower)
         screen.blit(bg, (0,0))
+        screen.blit(loadingText[0], (width * 0.25, height))
 
 def update_scene3():
     pass
