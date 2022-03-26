@@ -49,7 +49,7 @@ key = {
 
 direction = 1
 
-x = 0
+x = width/2-tiles['flower'].get_width()/2
 y = height-tiles["flower"].get_height()
 
 scene = 1
