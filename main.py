@@ -114,16 +114,19 @@ def draw_scene2():
         screen.blit(tiles['flower'], (flower[0], flower[1]+gravity*seconds()))
 
 def update_scene2():
-
-    if math.log2(round(seconds()+1+score)) > len(flowers):
+    global score, gravity
+    if math.log1p(round(seconds()+1)) > len(flowers):
         flowers.append([round(np.random.uniform() * (width - tiles['flower'].get_width())), -(seconds() * gravity + tiles['flower'].get_height())])
 
     for i in range(len(flowers)):
         if flowers[i][1] > -(seconds() * gravity - height):
             flower_respawn(i)
+            gravity += 10
 
 def pre_update_scene2():
-    pass
+    global width, height
+    width = bg.get_width()
+    height = bg.get_height()
 
 def draw_scene3():
     if seconds() - fullscreen_time < 1:
