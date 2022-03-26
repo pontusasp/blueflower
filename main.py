@@ -79,7 +79,8 @@ def draw_scene1():
         screen.blit(tiles['flower'], (flower[0], flower[1]+gravity*seconds()))
 
 def update_scene1():
-    global x, scene, score, gravity, speed
+    global x, scene, score, gravity, speed, fullscreen_time
+    fullscreen_time = seconds()
     if key["d"]:
         x += speed
     if key["a"]:
@@ -115,13 +116,13 @@ def draw_scene2():
 
 def update_scene2():
     global score, gravity
-    if math.log1p(round(seconds()+1)) > len(flowers):
-        flowers.append([round(np.random.uniform() * (width - tiles['flower'].get_width())), -(seconds() * gravity + tiles['flower'].get_height())])
+    if math.log1p(round(seconds()+1+score*10)) > len(flowers):
+        flowers.append([round(np.random.uniform() * (width - tiles['flower'].get_width())), -(seconds() * gravity*10 + tiles['flower'].get_height())])
 
     for i in range(len(flowers)):
         if flowers[i][1] > -(seconds() * gravity - height):
             flower_respawn(i)
-            gravity += 10
+            score += 1
 
 def pre_update_scene2():
     global width, height
@@ -163,16 +164,16 @@ def draw():
     global x
     if scene == 1:
         draw_scene1()
-    if scene == 2:
+    elif scene == 2:
         draw_scene2()
-    if scene == 3:
+    elif scene == 3:
         draw_scene3()
     pygame.display.flip()
     pygame.display.update()
 
 
 def handle_keyboard(keypress, keydown):
-    global key, running
+    global key, running, scene, width, height, x
     if keypress == pygame.K_w:
         key["w"] = keydown
     if keypress == pygame.K_a:
@@ -182,7 +183,13 @@ def handle_keyboard(keypress, keydown):
     if keypress == pygame.K_d:
         key["d"] = keydown
     if keypress == pygame.K_ESCAPE:
-        running=False
+        if scene == 2:
+            pygame.mouse.set_visible(True)
+            width = 800
+            height = 600
+            pygame.display.set_mode((800,600))
+            scene = 1
+            x = 400
 
 
 def rescale(scale):
@@ -204,11 +211,19 @@ def rescale(scale):
     screen=pygame.display.set_mode((width,height))
 
 def handle_events():
-    global running
+    global running, scene, width, height, x
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            rescale(0.75)
-            running=width>50
+            if scene == 2:
+                pygame.mouse.set_visible(True)
+                width = 800
+                height = 600
+                pygame.display.set_mode((800,600))
+                scene = 1
+                x = 400
+            elif scene == 1:
+                rescale(0.75)
+                running=width>50
         if event.type == pygame.KEYDOWN:
             handle_keyboard(event.key, True)
         if event.type == pygame.KEYUP:
