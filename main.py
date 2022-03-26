@@ -47,8 +47,6 @@ key = {
     "d": False,
 }
 
-direction = 1
-
 x = width/2-tiles['flower'].get_width()/2
 y = height-tiles["flower"].get_height()
 
@@ -115,7 +113,7 @@ def draw_scene3():
     else:
         screen.fill(color_blueflower)
         screen.blit(bg, (0,0))
-        screen.blit(loadingText[min(round((seconds() - fullscreen_time - 1) * 20), 100)], (width * 0.25, height))
+        screen.blit(loadingText[min(round((seconds() - fullscreen_time - 1) * 20), 100)], (bg.get_width() * 0.1075, bg.get_height() * 0.555))
 
 def update_scene3():
     pass
@@ -157,11 +155,30 @@ def handle_keyboard(keypress, keydown):
         running=False
 
 
+def rescale(scale):
+    global screen, width, height, gravity, x, y, speed, flowers
+    x *= scale
+    y *= scale
+    speed *= scale
+    gravity *= scale
+
+    for i in range(len(flowers)):
+        flowers[i][0] *= scale
+        flowers[i][1] *= scale
+
+    for key in tiles:
+        tiles[key] = pygame.transform.scale(tiles[key], (tiles[key].get_width() * scale, tiles[key].get_height() * scale))
+
+    width = math.floor(width * scale)
+    height = math.floor(height * scale)
+    screen=pygame.display.set_mode((width,height))
+
 def handle_events():
-    global running, direction
+    global running
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running=False
+            rescale(0.75)
+            running=width>50
         if event.type == pygame.KEYDOWN:
             handle_keyboard(event.key, True)
         if event.type == pygame.KEYUP:
