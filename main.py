@@ -115,7 +115,7 @@ def draw_scene3():
     else:
         screen.fill(color_blueflower)
         screen.blit(bg, (0,0))
-        screen.blit(loadingText[0], (width * 0.25, height))
+        screen.blit(loadingText[min(round((seconds() - fullscreen_time - 1) * 20), 100)], (width * 0.25, height))
 
 def update_scene3():
     pass
