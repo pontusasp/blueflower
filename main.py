@@ -1,8 +1,11 @@
 import math
 import pygame
 import numpy as np
+import pyautogui
 
 pygame.init()
+screenshot_raw = pyautogui.screenshot('resources/screenshot.png')
+screenshot = pygame.image.load('resources/screenshot.png')
 running=True
 width=800
 height=600
@@ -25,11 +28,14 @@ tiles = {
 
 
 bg = pygame.image.load(r'resources/bsod.png')
+shrug = pygame.image.load(r'resources/shrug.png')
 
 smileyFont = pygame.font.Font('resources/font/segoeui.ttf', 155)
 smiley = smileyFont.render(':(', True, color_white)
 smileyRect = smiley.get_rect()
 smileyRect.center = (3*width/10, 5*height/12)
+
+lolJk = smileyFont.render('¯\_(ツ)_/¯', True, color_white)
 
 font = pygame.font.Font('resources/font/segoeui.ttf', 30)
 loadingText = []
@@ -64,7 +70,7 @@ score = 0
 def flower_respawn(i):
     global flowers
     flowers[i][0] = round(np.random.uniform() * (width - tiles['flower'].get_width()))
-    flowers[i][1] = -(seconds() * gravity + tiles['flower'].get_height())
+    flowers[i][1] = -(seconds() * gravity + tiles['flower'].get_height()) - np.random.uniform() * bg.get_height()
 
 def draw_scene1():
     screen.fill(color_screen)
@@ -103,29 +109,50 @@ def update_scene1():
 
 def draw_scene2():
     screen.fill(color_screen)
+    screen.blit(screenshot, (0, 0))
+    for flower in flowers:
+        screen.blit(tiles['flower'], (flower[0], flower[1]+gravity*seconds()))
 
 def update_scene2():
+
+    if math.log2(round(seconds()+1+score)) > len(flowers):
+        flowers.append([round(np.random.uniform() * (width - tiles['flower'].get_width())), -(seconds() * gravity + tiles['flower'].get_height())])
+
+    for i in range(len(flowers)):
+        if flowers[i][1] > -(seconds() * gravity - height):
+            flower_respawn(i)
+
+def pre_update_scene2():
     pass
 
 def draw_scene3():
     if seconds() - fullscreen_time < 1:
         screen.fill(color_black)
-    else:
+    elif round((seconds() - fullscreen_time - 1) * 20) <= 100:
         screen.fill(color_blueflower)
         screen.blit(bg, (0,0))
         screen.blit(loadingText[min(round((seconds() - fullscreen_time - 1) * 20), 100)], (bg.get_width() * 0.1075, bg.get_height() * 0.555))
+    else:
+        screen.fill(color_blueflower)
+        screen.blit(shrug, (bg.get_width()//2 - shrug.get_width()//2, bg.get_height()//2 - shrug.get_height()//2))
+
 
 def update_scene3():
-    pass
+    global running, scene
+    if seconds() - fullscreen_time > 8:
+        scene=2
 
 def pre_update_scene3():
-    global fullscreen, bg, fullscreen_time
+    global fullscreen, bg, fullscreen_time, shrug
     if not fullscreen:
         fullscreen_time = seconds()
         pygame.mouse.set_visible(False)
         pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         display_info = pygame.display.Info()
+        bg_w0 = bg.get_width()
         bg = pygame.transform.scale(bg, (display_info.current_w, display_info.current_h)) 
+        bg_w1 = bg.get_width()
+        shrug = pygame.transform.scale(shrug, (math.floor(shrug.get_width()*bg_w1/bg_w0), math.floor(shrug.get_height()*bg_w1/bg_w0)))
         fullscreen=True
 
 
@@ -134,7 +161,7 @@ def draw():
     if scene == 1:
         draw_scene1()
     if scene == 2:
-        draw_scene3()
+        draw_scene2()
     if scene == 3:
         draw_scene3()
     pygame.display.flip()
@@ -193,6 +220,8 @@ def update():
         update_scene3()
 
 def pre_update():
+    if scene == 2:
+        pre_update_scene2()
     if scene == 3:
         pre_update_scene3()
 
