@@ -55,7 +55,8 @@ def draw_scene2():
     screen.fill(color_screen)
     screen.blit(bg, (0, 0))
     for flower in flowers:
-        screen.blit(tiles['flower'][flower[2]], (flower[0], flower[1]+gravity*seconds()))
+        theta = seconds()+flower[0]+flower[1]
+        screen.blit(tiles['flower'][flower[2]], (flower[0] + np.cos(theta)*flower_width*2, flower[1]+gravity*seconds() - np.cos(theta*2)*flower_height/4))
 
 def update_scene2():
     global score, gravity
