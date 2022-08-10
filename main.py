@@ -1,6 +1,8 @@
 import math
 import pygame
 import numpy as np
+import win32gui # pywin32
+import win32con # pywin32
 
 pygame.init()
 running=True
@@ -10,6 +12,7 @@ screen_size = np.array([width, height])
 color_blueflower=(0, 120, 215)
 color_white=(255, 255, 255)
 color_black=(0, 0, 0)
+hwnd=None
 
 screen=pygame.display.set_mode((width,height))
 pygame.display.set_caption('BLUEFLOWER')
@@ -51,8 +54,16 @@ def draw():
     pygame.display.update()
 
 def pre_update():
-    global fullscreen, bg, fullscreen_time, shrug
-    if not fullscreen:
+    global fullscreen, bg, fullscreen_time, shrug, hwnd
+    if hwnd is None:
+        hwnd = win32gui.GetForegroundWindow()
+        pygame.display.iconify()
+    elif not fullscreen and seconds() > 10:
+        print("10 s passed")
+        #if win32gui.IsIconic(hwnd):
+        #win32gui.ShowWindow(hwnd, win32con.SW_SHOWNOACTIVATE)
+        win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
+        win32gui.BringWindowToTop(hwnd)
         fullscreen_time = seconds()
         pygame.mouse.set_visible(False)
         pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
