@@ -3,6 +3,7 @@ import pygame
 import numpy as np
 import win32gui # pywin32
 import win32con # pywin32
+import sys
 
 pygame.init()
 running=True
@@ -41,12 +42,13 @@ fullscreen = False
 fullscreen_time = seconds()
 
 def draw():
+    progressbar = round((seconds() - fullscreen_time - 1) * (100/loadingTime))
     if seconds() - fullscreen_time < 1:
         screen.fill(color_black)
-    elif round((seconds() - fullscreen_time - 1) * 20) <= 100:
+    elif progressbar <= 100:
         screen.fill(color_blueflower)
         screen.blit(bg, (0,0))
-        screen.blit(loadingText[min(round((seconds() - fullscreen_time - 1) * 20), 100)], (bg.get_width() * 0.1075, bg.get_height() * 0.555))
+        screen.blit(loadingText[min(progressbar, 100)], (bg.get_width() * 0.1075, bg.get_height() * 0.555))
     else:
         screen.fill(color_blueflower)
         screen.blit(shrug, (bg.get_width()//2 - shrug.get_width()//2, bg.get_height()//2 - shrug.get_height()//2))
@@ -58,8 +60,8 @@ def pre_update():
     if hwnd is None:
         hwnd = win32gui.GetForegroundWindow()
         pygame.display.iconify()
-    elif not fullscreen and seconds() > 10:
-        print("10 s passed")
+    elif not fullscreen and seconds() > miniTime:
+        print(f"{miniTime} s passed")
         #if win32gui.IsIconic(hwnd):
         #win32gui.ShowWindow(hwnd, win32con.SW_SHOWNOACTIVATE)
         win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
@@ -102,4 +104,11 @@ def main():
     quit()
 
 if __name__=='__main__':
+    global miniTime, loadingTime
+    loadingTime = 5
+    miniTime = 10
+    if len(sys.argv) > 1:
+        miniTime = int(sys.argv[1])
+    if len(sys.argv) > 2:
+        loadingTime = int(sys.argv[2])
     main()
